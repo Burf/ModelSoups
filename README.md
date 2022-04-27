@@ -1,13 +1,17 @@
-# Model Soup
+# Model Soups
 
-This is an implementation of "Model Soup" on Keras, Tensorflow and Torch.
+This is an implementation of "Model Soups" on Keras, Tensorflow and Torch.
 
 The implementation is based on paper[[1](https://arxiv.org/abs/2203.05482v1)].
+
+## Method
+- Uniform Soup
+- Greedy Soup
 
 ## Requirements
 
 - Python 3
-- tensorflow 2 or Torch
+- Tensorflow2 or Torch
 
 ## Reference
 
