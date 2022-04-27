@@ -23,7 +23,7 @@ def uniform_soup(model, path, by_name = False):
             tf.keras.backend.set_value(w1, np.mean(w2, axis = 0))
     return model
 
-def greedy_soup(model, path, data, metric, compare = np.greater_equal, by_name = False, digits = 4, verbose = True, y_true = "y_true"):
+def greedy_soup(model, path, data, metric, update_greedy = False, compare = np.greater_equal, by_name = False, digits = 4, verbose = True, y_true = "y_true"):
     try:
         import tensorflow as tf
     except:
@@ -32,16 +32,16 @@ def greedy_soup(model, path, data, metric, compare = np.greater_equal, by_name =
     
     if not isinstance(path, list):
         path = [path]
-    score, soup = 0, None
+    score, soup = None, []
     input_key = [inp.name for inp in model.inputs]
     input_cnt = len(input_key)
     for i, model_path in enumerate(path):
-        model.load_weights(model_path, by_name = by_name)
-        if i == 0: #soup is None:
-            soup = [np.array(w) for w in model.weights]
-        else:
+        if update_greedy:
+            model.load_weights(model_path, by_name = by_name)
             for w1, w2 in zip(model.weights, soup):
                 tf.keras.backend.set_value(w1, np.mean([w1, w2], axis = 0))
+        else:
+            model = uniform_soup(model, soup + [model_path], by_name = by_name)
                 
         iterator = iter(data)
         history = []
@@ -82,11 +82,17 @@ def greedy_soup(model, path, data, metric, compare = np.greater_equal, by_name =
                 print("")
                 #gc.collect()
                 break
-        if 0 < len(history) and compare(np.nanmean(history), score):
+        if 0 < len(history) and (score is None or compare(np.nanmean(history), score)):
             score = np.nanmean(history)
-            soup = [np.array(w) for w in model.weights]
-    if soup is not None:
-        for w1, w2 in zip(model.weights, soup):
-            tf.keras.backend.set_value(w1, w2)
-        print("model soup best score : {0}".format(score))
+            if update_greedy:
+                soup = [np.array(w) for w in model.weights]
+            else:
+                soup += [model_path]
+    if len(soup) != 0:
+        if update_greedy:
+            for w1, w2 in zip(model.weights, soup):
+                tf.keras.backend.set_value(w1, w2)
+        else:
+            model = uniform_soup(model, soup, by_name = by_name)
+        print("model soup best score : {val:.{digits}f}".format(val = score, digits = digits))
     return model
