@@ -94,5 +94,6 @@ def greedy_soup(model, path, data, metric, update_greedy = False, compare = np.g
                 tf.keras.backend.set_value(w1, w2)
         else:
             model = uniform_soup(model, soup, by_name = by_name)
-        print("model soup best score : {val:.{digits}f}".format(val = score, digits = digits))
+        if verbose:
+            print("greedy soup best score : {val:.{digits}f}".format(val = score, digits = digits))
     return model

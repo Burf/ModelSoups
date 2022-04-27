@@ -113,5 +113,6 @@ def greedy_soup(model, path, data, metric, device = "cpu", update_greedy = False
             model.load_state_dict(model_dict)
         else:
             model = uniform_soup(model, soup, device = device, by_name = by_name)
-        print("model soup best score : {val:.{digits}f}".format(val = score, digits = digits))
+        if verbose:
+            print("greedy soup best score : {val:.{digits}f}".format(val = score, digits = digits))
     return model
